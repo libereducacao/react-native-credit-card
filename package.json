@@ -1,5 +1,5 @@
 {
-  "name": "react-native-credit-card",
+  "name": "@liberdev/react-native-credit-card",
   "version": "0.1.9",
   "description": "React native credit card input component",
   "main": "index.js",

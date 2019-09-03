@@ -80,7 +80,6 @@ class CreditCard extends Component {
 			const amountOfSpaces = Math.ceil(maxLength / 4);
 
 			for (var i = 1; i <= amountOfSpaces; i++) {
-				var space_index = i * 4 + (i - 1);
 				spacedNumber.push(
 					<View>
 						<Text style={styles.textNumber}>{string.slice((i - 1) * 4, i * 4)}</Text>
@@ -88,7 +87,7 @@ class CreditCard extends Component {
 				);
 			}
 		}
-		console.log(spacedNumber);
+
 		return spacedNumber;
 	}
 	name() {
@@ -145,10 +144,9 @@ class CreditCard extends Component {
 			},
 			this.props.style,
 		];
-		console.log(this.props.type, this.state.type.name);
 
 		const background =
-			this.props.type || this.state.type.name !== 'unkonwn' ? this.props.background : 'blank';
+			this.props.type || this.state.type.name !== 'unknown' ? this.props.background : 'blank';
 
 		return (
 			<View style={cardStyle}>

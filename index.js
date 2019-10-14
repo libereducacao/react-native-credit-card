@@ -24,12 +24,12 @@ class CreditCard extends Component {
     return this[name]();
   }
   componentWillReceiveProps(nextProps) {
-    this.updateType(nextProps);
+    if (this.props.validateCard) {
+      this.updateType(nextProps);
+    }
   }
   componentWillMount() {
-    if (this.props.validateCard) {
-      this.updateType(this.props);
-    }
+    this.updateType(this.props);
   }
   updateType(props) {
     if (!props.number) return this.setState({ type: "unknown" });
@@ -50,9 +50,8 @@ class CreditCard extends Component {
     }
 
     const mask =
-      this.props.numberMask || this.type.name === "amex"
-        ? "#### ###### #####"
-        : "#### #### #### ####";
+      this.props.numberMask ||
+      (this.type.name === "amex" ? "#### ###### #####" : "#### #### #### ####");
 
     let i = 0;
     const filledMask = mask.replace(/#/g, (_, j) => {
@@ -104,7 +103,7 @@ class CreditCard extends Component {
       var string = this.props.cvv.toString();
     }
     const mask =
-      this.props.cvvMask || this.type.name === "amex" ? "####" : "###";
+      this.props.cvvMask || (this.type.name === "amex" ? "####" : "###");
 
     let i = 0;
     const filledMask = mask.replace(/#/g, (_, j) => {

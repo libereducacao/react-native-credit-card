@@ -1,19 +1,12 @@
 "use strict";
 
 import React from "react";
-const { PropTypes, Component } = React;
+const { Component } = React;
 
 import Payment from "payment";
 import FlipCard from "react-native-flip-card";
 
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Platform,
-  Image
-} from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 const images = require("./images");
 const validate = Payment.fns;
 
@@ -34,22 +27,20 @@ class CreditCard extends Component {
     this.updateType(nextProps);
   }
   componentWillMount() {
-    this.updateType(this.props);
+    if (this.props.validateCard) {
+      this.updateType(this.props);
+    }
   }
   updateType(props) {
-    if (!props.number)
-      return this.setState({ type: { name: "unknown", length: 16 } });
+    if (!props.number) return this.setState({ type: "unknown" });
 
     var type = validate.cardType(props.number);
+
     if (type) {
-      if (type === "amex") {
-        return this.setState({ type: { name: type, length: 15 } });
-      } else {
-        return this.setState({ type: { name: type, length: 16 } });
-      }
+      return this.setState({ type });
     }
 
-    return this.setState({ type: { name: "unknown", length: 16 } });
+    return this.setState({ type: "unknown" });
   }
   number() {
     if (!this.props.number) {
@@ -58,47 +49,24 @@ class CreditCard extends Component {
       var string = this.props.number.toString();
     }
 
-    const maxLength = this.state.type.length;
+    const mask =
+      this.props.numberMask || this.type.name === "amex"
+        ? "#### ###### #####"
+        : "#### #### #### ####";
 
-    const spacedNumber = [];
-
-    if (string.length > maxLength) string = string.slice(0, maxLength);
-
-    while (string.length < maxLength) {
-      string += "•";
-    }
-
-    if (this.state.type.name === "amex") {
-      spacedNumber.push(
-        <View>
-          <Text style={styles.textNumber}>{string.slice(0, 4)}</Text>
-        </View>
-      );
-      spacedNumber.push(
-        <View>
-          <Text style={styles.textNumber}>{string.slice(4, 10)}</Text>
-        </View>
-      );
-      spacedNumber.push(
-        <View>
-          <Text style={styles.textNumber}>{string.slice(10, 15)}</Text>
-        </View>
-      );
-    } else {
-      const amountOfSpaces = Math.ceil(maxLength / 4);
-
-      for (var i = 1; i <= amountOfSpaces; i++) {
-        spacedNumber.push(
-          <View>
-            <Text style={styles.textNumber}>
-              {string.slice((i - 1) * 4, i * 4)}
-            </Text>
-          </View>
-        );
+    let i = 0;
+    const filledMask = mask.replace(/#/g, (_, j) => {
+      if (i >= string.length) {
+        return "•";
       }
-    }
 
-    return spacedNumber;
+      return string[i++];
+    });
+    return filledMask.split(" ").map(value => (
+      <View>
+        <Text style={styles.textNumber}>{value}</Text>
+      </View>
+    ));
   }
   name() {
     if (!this.props.name) {
@@ -130,17 +98,35 @@ class CreditCard extends Component {
   }
 
   cvv() {
-    if (this.props.cvv == null) {
-      return "•••";
+    if (!this.props.cvv) {
+      var string = "";
     } else {
-      return this.props.cvv.toString().length <= 4
-        ? this.props.cvv
-        : this.props.cvv.toString().slice(0, 4);
+      var string = this.props.cvv.toString();
     }
+    const mask =
+      this.props.cvvMask || this.type.name === "amex" ? "####" : "###";
+
+    let i = 0;
+    const filledMask = mask.replace(/#/g, (_, j) => {
+      if (i >= string.length) {
+        return "•";
+      }
+
+      return string[i++];
+    });
+    return filledMask;
+  }
+
+  get type() {
+    const type = this.props.type || this.state.type;
+    if (type === "amex") {
+      return { name: "amex", length: 15 };
+    }
+    return { name: type, length: 16 };
   }
 
   render() {
-    const isAmex = this.state.type && this.state.type.name === "amex";
+    const isAmex = this.type.name === "amex";
 
     const { expiryAfterText, width } = this.props;
     const height = width / 1.65;
@@ -156,9 +142,7 @@ class CreditCard extends Component {
     ];
 
     const background =
-      this.props.type || this.state.type.name !== "unknown"
-        ? this.props.background
-        : "blank";
+      this.type.name !== "unknown" ? this.props.background : "blank";
 
     return (
       <View style={cardStyle}>
@@ -194,10 +178,7 @@ class CreditCard extends Component {
               <Image
                 style={styles.logo}
                 source={{
-                  uri:
-                    images.brands[
-                      this.props.type ? this.props.type : this.state.type.name
-                    ]
+                  uri: images.brands[this.type.name]
                 }}
               />
               {isAmex ? (
@@ -245,10 +226,7 @@ class CreditCard extends Component {
             <Image
               style={styles.logoBack}
               source={{
-                uri:
-                  images.brands[
-                    this.props.type ? this.props.type : this.state.type.name
-                  ]
+                uri: images.brands[this.type.name]
               }}
             />
             {this.props.shiny ? (
@@ -421,11 +399,11 @@ CreditCard.defaultProps = {
   expiryAfterText: "validade",
   fullNameText: "Nome Completo",
   shinyAfterBack: "",
-  type: null,
   width: 305,
   bgColor: "transparent",
   clickable: true,
-  background: "yellow"
+  background: "yellow",
+  validateCard: true
 };
 
 CreditCard.CardImages = images;

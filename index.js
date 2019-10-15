@@ -180,11 +180,6 @@ class CreditCard extends Component {
                   uri: images.brands[this.type.name]
                 }}
               />
-              {isAmex ? (
-                <View style={styles.cvvFront}>
-                  <Text style={styles.text}>{this.getValue("cvv")}</Text>
-                </View>
-              ) : null}
               <View style={styles.info}>
                 <View style={styles.number}>{this.getValue("number")}</View>
                 <View style={styles.rowWrap}>

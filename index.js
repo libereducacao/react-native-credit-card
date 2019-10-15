@@ -61,8 +61,8 @@ class CreditCard extends Component {
 
       return string[i++];
     });
-    return filledMask.split(" ").map(value => (
-      <View>
+    return filledMask.split(" ").map((value, index) => (
+      <View key={`react-native-credit-card-number-${key}`}>
         <Text style={styles.textNumber}>{value}</Text>
       </View>
     ));
